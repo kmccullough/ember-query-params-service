@@ -23,10 +23,18 @@ module('Acceptance | Navigation', function(hooks) {
     });
   });
 
-  test('initially, no qeury params are set', function(assert) {
+  test('initially, no query params are set', function(assert) {
     let queryParams = Object.keys(getQPService().current);
 
     assert.ok(queryParams.length === 0, 'there are 0 query params');
+  });
+
+  test('initially, no extraneous query-param delimiter', function(assert) {
+    const { href } =  window.location;
+    assert.ok(
+      href.charAt(href.length - 1) !== '?',
+      `there is no trailing delimiter in "${href}"`
+    );
   });
 
   module('setting query params', function(hooks) {
