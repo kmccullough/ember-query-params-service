@@ -53,13 +53,17 @@ export default class QueryParamsService extends Service {
     this.setOnPath(path, queryParams);
   }
 
-  private pathFromRouteInfo(routeInfo: RouteInfo) {
-    const routeParams = dynamicSegmentsFromRouteInfo(routeInfo);
-    let path = this.router.urlFor(routeInfo.name, ...routeParams);
+  pathFromRouteParams(routeName: string, ...routeParams: string[]) {
+    let path = this.router.urlFor(routeName, ...routeParams);
     if (path.charAt(0) === '#') {
       path = path.substr(1);
     }
     return path;
+  }
+
+  pathFromRouteInfo(routeInfo: RouteInfo) {
+    const routeParams = dynamicSegmentsFromRouteInfo(routeInfo);
+    return this.pathFromRouteParams(routeInfo.name, ...routeParams);
   }
 
   /**
@@ -73,7 +77,7 @@ export default class QueryParamsService extends Service {
     window.history.replaceState({ path: newUrl }, '', newUrl);
   }
 
-  private setOnPath(path: string, queryParams: object) {
+  setOnPath(path: string, queryParams: object) {
     this.byPath[path] = this.byPath[path] || {};
 
     Object.keys(queryParams || {}).forEach(key => {
@@ -99,12 +103,8 @@ const queryParamHandler = {
     return Reflect.get(obj, key, ...rest);
   },
   set(obj: any, key: string, value: any, ...rest: any[]) {
-    let { protocol, host, pathname } = window.location;
-    let query = qs.stringify({ ...obj, [key]: value });
-    let newUrl = `${protocol}//${host}${pathname}?${query}`;
-
+    const newUrl = urlWithParams({ ...obj, [key]: value });
     window.history.pushState({ path: newUrl }, '', newUrl);
-
     return Reflect.set(obj, key, value, ...rest);
   },
 };
